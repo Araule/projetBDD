@@ -48,6 +48,5 @@ for ligne in CSVVentes:
         VALUES(:Employe_Id, :Boisson_Id, :Date)", ligne)
 fichierVentes.close()
 
-
 bdd.commit()
 bdd.close()
