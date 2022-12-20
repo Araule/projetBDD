@@ -35,8 +35,12 @@ nb_employes_prof = "SELECT COUNT(matricule), profession FROM Employes GROUP BY p
 print("nb_employes_prof =")
 affiche(nb_employes_prof)
 
-#revenu total du groupe NE MARCHE PAS
-revenu_total = "SELECT SUM(prix) FROM Carte as C INNER JOIN Ventes as V ON C.idBoisson = V.idBoisson"
+#revenu total du groupe
+#Revu par Camille, fonctionne.
+#problème rencontré avec COUNT(idBoisson) : sqlite3.OperationalError: ambiguous column name:idBoisson
+#explication : même attribut dans deux tables différentes (Ventes, Carte)
+#solution : mettre le nom de la table comme préfixe à l'attribut pour savoir quel attribut on souhaite
+revenu_total = "SELECT COUNT(Ventes.idBoisson), ROUND(SUM(Carte.prix_EU),2) FROM Ventes, Carte WHERE Ventes.idBoisson = Carte.idBoisson"
 print("revenu_total =")
 affiche(revenu_total)
 
