@@ -16,23 +16,25 @@ def affiche(requete):
     return 
 
 # Récuperer la date à laquelle le moins de vente a été enregistré
-date_peu_vente = "SELECT COUNT (idBoisson), date FROM Ventes \
+curseur.execute("SELECT COUNT (idBoisson), date FROM Ventes \
                     GROUP BY date \
                     ORDER BY COUNT(idBoisson) \
-                    LIMIT 1"
+                    LIMIT 1")
 print("\nla date à laquelle le moins de vente a été enregistré : ")
-print("(nombre de boissons vendues, date)")
-affiche(date_peu_vente)
+results = curseur.fetchall()
+for r in results :
+    print(f"Le {r[1]} a été vendu seulement {r[0]} boissons.")
 
 # Récuperer la date à laquelle les bénéfices ont été les moins importants
-date_peu_benefice = "SELECT ROUND(SUM(prix_EU),2), date AS benefice \
+curseur.execute("SELECT ROUND(SUM(prix_EU),2), date AS benefice \
                         FROM Ventes AS V, Carte AS C \
                         WHERE C.idBoisson = V.idBoisson \
                         GROUP BY date \
                         ORDER BY benefice \
-                        LIMIT 1"
+                        LIMIT 1")
 print("\nla date à laquelle les bénéfices ont été les moins importants : ")
-print("(revenu total des ventes de la journée (en euro), date)")
-affiche(date_peu_benefice)
+results = curseur.fetchall()
+for r in results :
+    print(f"Le {r[1]} a été fait un bénéfice de seulement {r[0]} euros.")
 
 bdd.close()
