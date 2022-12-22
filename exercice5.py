@@ -9,7 +9,7 @@ curseur = bdd.cursor()
 
 # On veut une table dans le database avec les identifiants des managers (prenom.nom) et  leur mot de passe (matricule)
 # la clé primaire sera l'identifiant du manager (dans notre datatbase, il n'y a pas de personne avec le même prénom et le même nom)
-# curseur.execute("CREATE TABLE Login (identifiant TEXT PRIMARY KEY, mot_de_passe TEXT NOT NULL);")
+curseur.execute("CREATE TABLE Managers (identifiant TEXT PRIMARY KEY, matricule TEXT NOT NULL);")
 
 # On crée une liste de dictionnaires avec { id : prenom.nom, mdp : matricule)
 curseur.execute("SELECT Em.prenom, Em.nom, Em.matricule \
@@ -22,29 +22,55 @@ for r in results :
     id_managers.append({ "id" : f"{r[0]}.{r[1]}", "mdp" : r[2] })
 
 # maintenant, on ajoute nos données dans la table Login
-#for id in id_managers :
-# curseur.execute("INSERT INTO Login (identifiant, mot_de_passe) \
-# VALUES(:id, :mdp)", id)
-# bdd.commit()
+for ligne in id_managers :
+    curseur.execute("INSERT INTO Managers (identifiant, matricule) \
+                        VALUES(:id, :mdp)", ligne)
+bdd.commit()
 
 # on vérifie que tout est en ordre
-curseur.execute("SELECT * FROM Login")
+curseur.execute("SELECT * FROM Managers")
 results = curseur.fetchall()
 for r in results :
     print(r)
 
 
 # L'utilisateur rentre ses identifiants
-identifiant = input("Entrez votre identifiant : ")
-mot_de_passe = input("Entrez votre mot de passe : ")
+identifiant = input("\nEntrez votre identifiant : ")
+mot_de_passe = input("Entrez votre matricule : ")
+
 # Si l'identification se passe bien, c'est un manager donc il a les droits d'utilisateur
 # Sinon un message d'erreur s'affiche
-connexion = f"SELECT identifiant from Login WHERE identifiant='{identifiant}' AND mot_de_passe ='{mot_de_passe}';"
+connexion = f"SELECT identifiant \
+                FROM Managers \
+                WHERE identifiant = '{identifiant}' \
+                AND matricule = '{mot_de_passe}';"
 curseur.execute(connexion)
 if not curseur.fetchone() :  # s'il n'y a pas de résultat, c'est que le login n'est pas bon, cet utilisateur n'est pas un manager
-    print("Identifiants incorrects.")
-else:
-    print("Bienvenue")
+    print("\nIdentifiants incorrects.")
+    exit()
+else :
+    print("\nVous souhaitez connaître  le nombre de boissons vendues par chacun des employés de votre établissement.\n")
+
+# maintenant que le manager est connecté, il va avoi accès au nombre de boissons vendues par chacun de ses employés
+# on reprend la requête de base de l'exercice 3
+curseur.execute(f"SELECT nom_bar \
+                    FROM Etablissements \
+                    WHERE matricule_manager = '{mot_de_passe}'")
+nom_bar = curseur.fetchone()
+
+print(f"Vous êtes le manager du bar \"{nom_bar[0]}\".\n")
+
+curseur.execute(f"SELECT E.nom, E.prenom, COUNT(V.idBoisson), ROUND(SUM(C.prix_EU),2) \
+            FROM Employes AS E \
+            INNER JOIN Ventes AS V \
+            ON E.matricule = V.matricule \
+            INNER JOIN Carte AS C \
+            ON C.idBoisson = V.idBoisson \
+            WHERE E.nom_bar = \"{nom_bar[0]}\" \
+            GROUP BY V.matricule")
+results = curseur.fetchall()
+for r in results :
+    print(f"{r[1]} {r[0]} a vendu {r[2]} boissons pour un total de {r[3]} euros.")
 
 
 bdd.close()
