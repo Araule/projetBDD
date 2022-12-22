@@ -21,10 +21,9 @@ curseur.execute("SELECT Em.prenom, Em.nom, Em.matricule \
                     AND Em.nom_bar = Et.nom_bar")
 results = curseur.fetchall()
 id_managers = []
-mdp_managers = []
 for r in results :
     id_managers.append((f"{r[0]}.{r[1]}", r[2]))
-print(id_managers, mdp_managers)
+print(id_managers)
 
 # L'utilisateur rentre son matricule
 #identifiant = input("Entrez votre identifiant : ")
