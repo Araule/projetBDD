@@ -47,12 +47,14 @@ connexion = f"SELECT identifiant \
 curseur.execute(connexion)
 if not curseur.fetchone() :  # s'il n'y a pas de résultat, c'est que le login n'est pas bon, cet utilisateur n'est pas un manager
     print("\nIdentifiants incorrects.")
-    exit()
+    exit() # le script s'arrête.
 else :
     print("\nVous souhaitez connaître  le nombre de boissons vendues par chacun des employés de votre établissement.\n")
 
-# maintenant que le manager est connecté, il va avoi accès au nombre de boissons vendues par chacun de ses employés
-# on reprend la requête de base de l'exercice 3
+# maintenant que le manager est connecté, il va avoir accès au nombre de boissons vendues par chacun de ses employés
+
+# on va chercher le nom du bar où il travaille. 
+# mot_de_passe est aussi le matricule du manager, cela rend la chose plus simple
 curseur.execute(f"SELECT nom_bar \
                     FROM Etablissements \
                     WHERE matricule_manager = '{mot_de_passe}'")
@@ -60,6 +62,7 @@ nom_bar = curseur.fetchone()
 
 print(f"Vous êtes le manager du bar \"{nom_bar[0]}\".\n")
 
+# on reprend la requête de base de l'exercice 3
 curseur.execute(f"SELECT E.nom, E.prenom, COUNT(V.idBoisson), ROUND(SUM(C.prix_EU),2) \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
