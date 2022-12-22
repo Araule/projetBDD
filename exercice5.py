@@ -14,17 +14,22 @@ import csv
 bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
 
-# On a ici la liste des matricules de l'ensemble des managers
-curseur.execute("SELECT matricule_manager \
-                    FROM Etablissements")
+# On veut une liste avec les identifiants des managers (prenom.nom) et une liste avec les mots de passe des managers (matricule)
+curseur.execute("SELECT Em.prenom, Em.nom, Em.matricule \
+                    FROM Employes AS Em, Etablissements AS Et \
+                    WHERE Et.matricule_manager = Em.matricule \
+                    AND Em.nom_bar = Et.nom_bar")
 results = curseur.fetchall()
-matricules_managers = []
+id_managers = []
+mdp_managers = []
 for r in results :
-    matricules_managers.append(r[0])
+    id_managers.append((f"{r[0]}.{r[1]}", r[2]))
+print(id_managers, mdp_managers)
 
 # L'utilisateur rentre son matricule
-identifiant = input("Entrez votre matricule : ")
-# Si son matricule se trouve dans la liste matricules_managers, alors il a les droits d'utilisateurs
+#identifiant = input("Entrez votre identifiant : ")
+#mot_de_passe = input("Entrez votre mot de passe : ")
+# Si l'identification se passe bien, c'est un manager donc il a les droits d'utilisateur
 # Sinon un message d'erreur s'affiche
 
 # Pour cela il faut rajouter cette liste d'utilisateurs autorisés dans la bdd
