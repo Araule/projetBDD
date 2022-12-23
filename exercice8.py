@@ -21,7 +21,7 @@ if not curseur.fetchone() :
     print("\nIdentifiants incorrects.")
     exit() 
 else :
-    print("\nVous souhaitez connaître le nombre de boissons vendues dans votre établissement.\n")
+    print("\nVous souhaitez connaître les boissons les moins vendues dans votre établissement.\n")
 
 curseur.execute(f"SELECT nom_bar \
                     FROM Etablissements \
