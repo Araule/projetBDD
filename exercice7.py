@@ -8,16 +8,27 @@ import csv
 bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
 
-def affiche(requete):
-    curseur.execute(requete)
-    results = curseur.fetchall()
-    for r in results:
-        print(f"{r}")
-    return
+#connexion du manager
+identifiant = input("\nEntrez votre identifiant : ")
+mot_de_passe = input("Entrez votre matricule : ")
 
-#Ici, on veut refaire la même chose que dans l’exercice 6 en affichant le résultat pour une date
-#donnée. Par exemple, on voudra afficher les ventes effectuées à l’échelle de l’établissement le
-#24 novembre 2022. La date sera définie en ligne de commande, par l’utilisateur.
+connexion = f"SELECT identifiant \
+                FROM Managers \
+                WHERE identifiant = '{identifiant}' \
+                AND matricule = '{mot_de_passe}';"
+curseur.execute(connexion)
+if not curseur.fetchone() :  
+    print("\nIdentifiants incorrects.")
+    exit() 
+else :
+    print("\nVous souhaitez connaître le nombre de boissons vendues dans votre établissement.\n")
+
+curseur.execute(f"SELECT nom_bar \
+                    FROM Etablissements \
+                    WHERE matricule_manager = '{mot_de_passe}'")
+nom_bar = curseur.fetchone()
+
+print(f"Vous êtes le manager du bar \"{nom_bar[0]}\".\n")
 
 
 #liste de toutes les dates
@@ -26,27 +37,29 @@ curseur.execute("SELECT date FROM Ventes;")
 for ligne in curseur.fetchall():
     dates.append(ligne[0])
 
+#manque le bénéfice par employé
 
 saisir_date=True
 while saisir_date :
     date_saisie = input("Entrez la date voulue (sous la forme 'jj/mm/aaaa'): ")
-    #Si la date entrée par le manager existe alors : 
+    #Si la date saisie par le manager existe dans la liste 'dates' alors : 
     if date_saisie in dates: 
-        résultat = curseur.execute(f"SELECT COUNT(Ventes.idBoisson), ROUND(SUM(Carte.prix_EU),2), Etablissements.nom_bar, Ventes.date\
-         FROM Ventes, Employes, Etablissements, Carte\
-            WHERE Ventes.matricule = Employes.matricule\
-                AND Etablissements.nom_bar = Employes.nom_bar\
-                    AND Carte.idBoisson = Ventes.idBoisson\
-                        AND Ventes.matricule = Employes.matricule\
-                            AND Ventes.date = ? \
-                                GROUP BY Etablissements.nom_bar", (date_saisie,))
-        results = curseur.fetchall() #résultat = tuple de 4 valeurs : nb de boissons vendues, montant associé, bar correspondant, date correspondant
+        curseur.execute(f"SELECT COUNT(V.idBoisson), ROUND(SUM(C.prix_EU),2), V.date\
+         FROM Ventes AS V, Employes AS E, Carte AS C, Etablissements AS Et\
+            WHERE V.matricule = E.matricule\
+                AND E.nom_bar =\"{nom_bar[0]}\"\
+                    AND Et.nom_bar = \"{nom_bar[0]}\"\
+                        AND C.idBoisson = V.idBoisson\
+                            AND V.matricule = E.matricule\
+                                AND V.date = ? \
+                                    GROUP BY Et.nom_bar", (date_saisie,))
+        results = curseur.fetchall() #résultat = tuple de 3 valeurs : nb de boissons vendues, montant associé, date correspondante
         for r in results:
-            print(f"Seulement {r[0]} boissons ont été vendu pour une valeur de {r[1]} euros à {r[2]} le {r[3]}.")
+            print(f"Seulement {r[0]} boissons ont été vendu pour une valeur de {r[1]} euros le {r[2]}.")
     #Sinon : 
     else :
         saisir_date=False
-        print("Aucunes ventes pour la date voulue.")
+        print("Cette date n'est pas valide.")
 
-#manque les bénéfices par employé
+
 bdd.close()
