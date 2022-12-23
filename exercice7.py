@@ -55,7 +55,7 @@ while saisir_date :
                                     GROUP BY Et.nom_bar", (date_saisie,))
         results = curseur.fetchall() #résultat = tuple de 3 valeurs : nb de boissons vendues, montant associé, date correspondante
         for r in results:
-            print(f"Seulement {r[0]} boissons ont été vendu pour une valeur de {r[1]} euros le {r[2]}.")
+            print(f"{r[0]} boissons ont été vendu pour une valeur de {r[1]} euros le {r[2]}.")
     #Sinon : 
     else :
         saisir_date=False
