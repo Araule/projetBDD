@@ -4,11 +4,19 @@
 
 import sqlite3
 import csv
+from datetime import datetime
 
 bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
 
-#connexion du manager
+# pour l'exercice, on affiche les identifiants de connexion des managers
+curseur.execute("SELECT * FROM Managers")
+results = curseur.fetchall()
+for r in results :
+    print(r)
+
+
+# Le manager se connecte
 identifiant = input("\nEntrez votre identifiant : ")
 mot_de_passe = input("Entrez votre matricule : ")
 
@@ -18,46 +26,85 @@ connexion = f"SELECT identifiant \
                 AND matricule = '{mot_de_passe}';"
 curseur.execute(connexion)
 if not curseur.fetchone() :  
-    print("\nIdentifiants incorrects.")
+    print("\nIdentifiants incorrects. Vous n'avez peut-être pas accès aux informations suivantes.")
     exit() 
 else :
-    print("\nVous souhaitez connaître le nombre de boissons vendues dans votre établissement.\n")
+    print("\nBienvenue.")
 
+
+# On sélectionne le bar du manager
 curseur.execute(f"SELECT nom_bar \
                     FROM Etablissements \
                     WHERE matricule_manager = '{mot_de_passe}'")
 nom_bar = curseur.fetchone()
+print(f"\nVous êtes le manager du bar \"{nom_bar[0]}\".")
 
-print(f"Vous êtes le manager du bar \"{nom_bar[0]}\".\n")
 
-'''
-dates = []
-curseur.execute("SELECT strftime('%m',date) FROM Ventes;")
-for ligne in curseur.fetchall():
-    dates.append(ligne[0])
-print(dates)
-'''
+# Le manager tape le mois de son choix en chiffre. 
+# On vérifie en même temps que c'est au bon format "mm"
+# Le manager a droit à deux essais
+mois = input("\nVous souhaitez les informations du mois de (au format mm) : ")
+liste_mois = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+if mois not in liste_mois :
+    mois = input("\nVous n'avez pas correctement rentrer le mois, veuillez recommencer (exemple pour le mois de janvier, taper 01) : ")
+    if mois not in liste_mois :
+        print("\nVous n'avez toujours pas correctement rentrer le mois. Le script se termine ici.")
+        exit()
 
-#problèmes : 
-# faire entrer que le mois à l'utilisateur
-#ne sait pas comment faire pour aussi afficher le bénéfice généré pour chaque employé dans la même requête
+# Le manager tape l'annee de son choix en chiffre.
+# pas de vérification car pas d'ambiguité comme avec le mois
+annee = input("\nVous souhaitez les informations de l'annee (au format yyyy) : ")
 
-curseur.execute(f"SELECT COUNT(V.idBoisson), ROUND(SUM(C.prix_EU),2)\
-    FROM Ventes AS V, Carte AS C , Employes AS E, Etablissements AS Et\
-        WHERE C.idBoisson = V.idBoisson\
-            AND E.nom_bar = \"{nom_bar[0]}\"\
-                AND Et.nom_bar = \"{nom_bar[0]}\"\
-                AND V.matricule = E.matricule\
-                    AND V.date BETWEEN '01-11-2022' AND '31-11-2022'\
-                        GROUP BY  Et.nom_bar")
+date = f"/{mois}/{annee}"
+
+# afficher le nombre de ventes effectuées ce mois-ci par ses employés et le montant que cela représente
+boissons_vendues = 0 # nombre de ventes effectuées le mois sélectionné par le manager
+recettes = 0 # les recettes de ses ventes
+# on groupe par journée le nombre de boissons vendues et les recettes
+curseur.execute(f"SELECT V.date, COUNT(V.idBoisson), ROUND(SUM(C.prix_EU), 2) \
+            FROM Employes AS E \
+            INNER JOIN Ventes AS V \
+            ON E.matricule = V.matricule \
+            INNER JOIN Carte AS C \
+            ON C.idBoisson = V.idBoisson \
+            WHERE E.nom_bar = \"{nom_bar[0]}\" \
+            GROUP BY V.date")
 results = curseur.fetchall()
 for r in results :
-    print(f"Vos employés ont vendu {r[0]} boissons pour un total de {r[1]} euros.")
+    if r[0].find(f"{date}") != -1 : # si dans la date dd/mm/yyyy, /mm/ = date = /mois/, soit le mois rentré par le manager
+        boissons_vendues += r[1] # on fait la somme des boissons vendues chaque jour
+        recettes += r[2] # on fait la somme des recettes journalières
 
-#Bien préciser pour E.nom_bar et Et.nom_bar qu'il s'agit du bar du manager
-#Sinon problème de résultat
-#Exemple avec Daniel.Faviet / T80612 / Le Saphir
-#Si on ne met que E.nom_bar =\"{nom_bar[0]}\" ou que Et.nom_bar = \"{nom_bar[0]}\"\
-#On aura comme boisson vendu 50170 au lieu de 5017 et comme total 266985,0 au lieu de 26698.5
+if boissons_vendues == 0 : # s'il n'y a pas de données pour le mois selectionné, soit pas de boissons vendues, alors le script s'arrête
+    print("\nIl n'y a pas de données pour ce mois-ci dans la base de données.")
+    exit()
+else :
+    print(f"\nVos employés ont vendu {boissons_vendues} boissons pour un total de {recettes} euros.") # et le script continue
+
+
+# afficher les bénéfices générés par chaque employé du bar.
+print("\nVoici les bénéfices générés par chaque employé du bar.")
+recettes_employe = 0 # on initialise la variable des bénéfices de l'employé
+nom_employe = "" # on initialise une variable qui contiendra le prenom et le nom de l'employe
+curseur.execute(f"SELECT V.date, E.nom, E.prenom, ROUND(SUM(C.prix_EU), 2) \
+            FROM Employes AS E \
+            INNER JOIN Ventes AS V \
+            ON E.matricule = V.matricule \
+            INNER JOIN Carte AS C \
+            ON C.idBoisson = V.idBoisson \
+            WHERE E.nom_bar = \"{nom_bar[0]}\" \
+            GROUP BY V.matricule, V.date")
+results = curseur.fetchall()
+for r in results :
+    if r[0].find(f"{date}") != -1 : 
+        nom = f"{r[2]} {r[1]}"
+        if nom_employe != nom and len(nom_employe) != 0 :
+            print(f"{nom_employe} a fait un bénéfice de {round(recettes_employe, 2)} euros.")
+            nom_employe = nom
+            recettes_employe = 0
+        recettes_employe += r[3]
+        nom_employe = f"{r[2]} {r[1]}"
+print(f"{nom_employe} a fait un bénéfice de {round(recettes_employe, 2)} euros.")
+
 
 bdd.close()

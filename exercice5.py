@@ -46,10 +46,10 @@ connexion = f"SELECT identifiant \
                 AND matricule = '{mot_de_passe}';"
 curseur.execute(connexion)
 if not curseur.fetchone() :  # s'il n'y a pas de résultat, c'est que le login n'est pas bon, cet utilisateur n'est pas un manager
-    print("\nIdentifiants incorrects.")
+    print("\nIdentifiants incorrects. Vous n'avez peut-être pas accès à ces informations.")
     exit() # le script s'arrête.
 else :
-    print("\nVous souhaitez connaître  le nombre de boissons vendues par chacun des employés de votre établissement.\n")
+    print("\nVous souhaitez accéder aux ventes effectuées dans votre bar.\n")
 
 # maintenant que le manager est connecté, il va avoir accès au nombre de boissons vendues par chacun de ses employés
 
@@ -63,17 +63,17 @@ nom_bar = curseur.fetchone()
 print(f"Vous êtes le manager du bar \"{nom_bar[0]}\".\n")
 
 # on reprend la requête de base de l'exercice 3
-curseur.execute(f"SELECT E.nom, E.prenom, COUNT(V.idBoisson), ROUND(SUM(C.prix_EU),2) \
+curseur.execute(f"SELECT V.date, E.prenom, E.nom, C.boisson, C.type, C.prix_EU \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
             ON E.matricule = V.matricule \
             INNER JOIN Carte AS C \
             ON C.idBoisson = V.idBoisson \
             WHERE E.nom_bar = \"{nom_bar[0]}\" \
-            GROUP BY V.matricule")
+            ORDER BY V.date")
 results = curseur.fetchall()
 for r in results :
-    print(f"{r[1]} {r[0]} a vendu {r[2]} boissons pour un total de {r[3]} euros.")
+    print(f"{r[0]} - {r[1]} {r[2]} : {r[3]}, {r[4]}, {r[5]} euros ")
 
 
 bdd.close()
