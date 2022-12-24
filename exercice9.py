@@ -39,10 +39,9 @@ curseur.execute(f"SELECT nom_bar \
 nom_bar = curseur.fetchone()
 print(f"\nVous êtes le manager du bar \"{nom_bar[0]}\".")
 
-
-# afficher les boissons les moins vendues dans l’établissement ce mois-ci
-print("\nVoici la liste des 10 boissons qui se sont le moins bien vendues dans votre établissement au mois de Novembre.")
-curseur.execute(f"SELECT C.boisson, COUNT(V.idBoisson) \
+# afficher les boissons qui ont rapporté le plus d’argent dans leur établissement ce mois-ci
+print("\nVoici la liste des 10 boissons qui ont rapporté le plus d'argent au mois de Novembre.")
+curseur.execute(f"SELECT C.boisson, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
             ON E.matricule = V.matricule \
@@ -50,16 +49,15 @@ curseur.execute(f"SELECT C.boisson, COUNT(V.idBoisson) \
             ON C.idBoisson = V.idBoisson \
             WHERE E.nom_bar = \"{nom_bar[0]}\" \
             GROUP BY C.boisson \
-            ORDER BY COUNT(V.idBoisson) \
+            ORDER BY ROUND(SUM(C.prix_EU), 2) DESC \
             LIMIT 10")
 results = curseur.fetchall()
 for r in results :
-    print(f"{r[0]} n'a été vendu que {r[1]} fois.")
+    print(f"{r[0]} a permis un bénéfice de {r[1]} euros.")
 
-
-# afficher les employés ayant vendu le moins de boissons.
-print("\nVoici la liste des 5 employés qui ont vendu le moins de boissons au mois de Novembre.")
-curseur.execute(f"SELECT E.nom, E.prenom, COUNT(V.idBoisson) \
+# afficher les employés ayant rapporté le plus d’argent.
+print("\nVoici la liste des 5 employés qui ont rapporté le plus d'argent au mois de Novembre.")
+curseur.execute(f"SELECT E.nom, E.prenom, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
             ON E.matricule = V.matricule \
@@ -67,11 +65,8 @@ curseur.execute(f"SELECT E.nom, E.prenom, COUNT(V.idBoisson) \
             ON C.idBoisson = V.idBoisson \
             WHERE E.nom_bar = \"{nom_bar[0]}\" \
             GROUP BY V.matricule \
-            ORDER BY COUNT(V.idBoisson) \
+            ORDER BY ROUND(SUM(C.prix_EU), 2) DESC \
             LIMIT 5")
 results = curseur.fetchall()
 for r in results :
-    print(f"{r[1]} {r[0]} n'a vendu que {r[2]} boissons.")
-
-
-bdd.close()
+    print(f"{r[1]} {r[0]} a fait un bénéfice de {r[2]} euros.")
