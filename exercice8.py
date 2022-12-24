@@ -31,10 +31,7 @@ nom_bar = curseur.fetchone()
 print(f"Vous êtes le manager du bar \"{nom_bar[0]}\".\n")
 
 
-#problèmes : 
-#faire entrer que le mois à l'utilisateur
-#faire apparaître les employés ayant vendus le moins de boissons dans la même requête
-
+#les boissons les moins vendues
 curseur.execute(f"SELECT C.boisson, COUNT(V.idBoisson)\
     FROM Carte AS C, Ventes AS V, Etablissements AS Et, Employes AS E\
         WHERE C.idBoisson = V.idBoisson\
@@ -49,5 +46,22 @@ curseur.execute(f"SELECT C.boisson, COUNT(V.idBoisson)\
 results = curseur.fetchall()
 for r in results :
     print(f"{r[0]} n'a été vendu que {r[1]} fois.")
+    
+#les employes ayant vendu le moins de boissons
+curseur.execute(f"SELECT E.prenom, E.nom, C.boisson, COUNT(V.idBoisson), ROUND(SUM(C.prix_EU),2)\
+            FROM Employes AS E, Carte AS C, Ventes AS V, Etablissements AS Et \
+                    WHERE E.matricule = V.matricule \
+                            AND C.idBoisson = V.idBoisson \
+                                AND E.nom_bar = \"{nom_bar[0]}\" \
+                                    AND Et.nom_bar = \"{nom_bar[0]}\"\
+                                        AND V.date BETWEEN '01-11-2022' AND '31-11-2022'\
+                                            GROUP BY V.matricule\
+                                             ORDER BY COUNT(V.idBoisson)\
+                                                LIMIT 5") #affiche les 5 employes ayant vendus le moins de boissons
+
+results = curseur.fetchall()
+for r in results :
+    print(f"{r[0]} {r[1]} a vendu {r[2]} seulement {r[3]} fois")
+
 
 bdd.close()
