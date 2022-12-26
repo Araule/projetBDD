@@ -18,7 +18,7 @@ for r in results :
 
 # Le manager se connecte
 identifiant = input("\nEntrez votre identifiant : ")
-mot_de_passe = input("Entrez votre mmot de passe : ")
+mot_de_passe = input("Entrez votre mot de passe : ")
 connexion = f"SELECT identifiant \
                 FROM Managers \
                 WHERE identifiant = '{identifiant}' \
@@ -37,6 +37,10 @@ curseur.execute(f"SELECT nom_bar \
                     WHERE matricule_manager = '{mot_de_passe}'")
 nom_bar = curseur.fetchone()
 print(f"\nVous êtes le manager du bar \"{nom_bar[0]}\".")
+
+# On demande au manager combien de boissons souhaite-il enlever de la carte 
+# On veut que la variable soit de type int
+input_chiffre = int(input("\nCombien de boissons maximum souhaitez-vous enlever de la carte ? "))
 
 
 # On rattache les résultats des deux requêtes à une variable pour les réutiliser plus tard
@@ -65,12 +69,22 @@ for r in results :
 
 # On crée une liste vide qui contiendra le nom des boissons que le manager peut supprimer de la carte
 liste_boisson = []
-# Si une boisson représente moins de 1% des bénéfices du bar et 1% du nombre des boissons vendus par le bar
-# Alors le manager peut l'enlever de la carte
 
 
-# affiche la boisson qui a rapporté le moins d'argent à la boisson qui a rapporté le plus d'argent
 i = 0 # on initialise un compteur
+
+# Dans la requête, les boissons sont triés de celle qui apporte le moins de bénéfice à celle qui en rapporte le plus
+# La boucle a plusieurs compteurs :
+# 1 : input_chiffre et i - si le compteur i atteint le nombre de boisson que le manager souhaite enlever de la carte, la boucle s'arrête
+# 2 : if statement : si les bénéfices de la boisson suivante représentent plus de 2% des bénéfices, la boucle s'arrête aussi
+# Il est peu probable que la boucle s'arrête à cause du deuxième compteur car une boisson qui représente plus de 2% des recettes totals sur un mois, c'est une boisson qui se vend très bien
+
+# Pour qu'une boisson soit supprimer, il faut que son bénéfice représente moins de 2% du bénéfice total du bar au mois de Novembre
+# Mais il faut aussi que le nombre de boissons vendues représente moins de 1% du nombre total de boissons vendues dans le mois
+# Cela permet d'écarter des boissons populaires auprès de la clientèle mais qui se vendent à un prix plus bas
+# L'idée est d'enlever certaines boissons peu populaire et qui rapporte peu, pas de ne garder que les boissons qui rapportent le plus
+# en s'alienant une partie de la clientèle
+
 curseur.execute(f"SELECT C.boisson, ROUND(SUM(C.prix_EU), 2) \
                     FROM Employes AS E \
                     INNER JOIN Ventes AS V \
@@ -82,7 +96,8 @@ curseur.execute(f"SELECT C.boisson, ROUND(SUM(C.prix_EU), 2) \
                     ORDER BY ROUND(SUM(C.prix_EU), 2)")
 results = curseur.fetchall()
 for r in results :
-    if r[1] < (total_bénéfice * 0.01) :
+    
+    if r[1] < (total_bénéfice * 0.02) :
         curseur.execute(f"SELECT COUNT(V.idboisson) \
                             FROM Employes AS E \
                             INNER JOIN Ventes AS V \
@@ -92,12 +107,19 @@ for r in results :
                             WHERE E.nom_bar = \"{nom_bar[0]}\" \
                             AND C.boisson = \"{r[0]}\"")
         results2 = curseur.fetchall()
+        
         for r2 in results2 :
+            
             if r2[0] < (total_vendue * 0.01) :
                 liste_boisson.append(f"{r[0]} : {r[1]} euros de bénéfice, vendue {r2[0]} fois")
                 i += 1
+    
+    if i != input_chiffre :
+        continue
+    
+    break
 
-print(f"\nVous pouvez supprimer de la carte {i} boissons. Chaque boisson représente moins de 1% des recettes totales du mois de Novembre et moins de 1% du nombre total de boissons vendues.")
+print(f"\nVous pouvez supprimer de la carte ces {i} boissons. Chaque boisson représente moins de 2% des recettes totales du mois de Novembre et moins de 1% du nombre total de boissons vendues.")
 for ligne in liste_boisson :
     print(ligne)
 
