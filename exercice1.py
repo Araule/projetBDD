@@ -37,7 +37,7 @@ for ligne in CSVEtablissements:
         VALUES(:Name, :Adresse, :NumTel, :Manager_Id)", ligne)
 fichierEtablissements.close()
 
-# L'entité Carte a pour attributs : idboisson (clé primaire car identifiant unique), boisson, type, prix_EU, degre_BIERES, quantite_CL
+# L'entité Carte a pour attributs : idBoisson (clé primaire car identifiant unique), boisson, type, prix_EU, degre_BIERES, quantite_CL
 fichierCarte = open(PATH+'carte.csv', 'rt')
 CSVCarte = csv.DictReader(fichierCarte, delimiter="\t")
 for ligne in CSVCarte:

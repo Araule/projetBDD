@@ -18,7 +18,7 @@ for r in results :
 
 # Le manager se connecte
 identifiant = input("\nEntrez votre identifiant : ")
-mot_de_passe = input("Entrez votre mmot de passe : ")
+mot_de_passe = input("Entrez votre matricule : ")
 connexion = f"SELECT identifiant \
                 FROM Managers \
                 WHERE identifiant = '{identifiant}' \
@@ -39,27 +39,33 @@ nom_bar = curseur.fetchone()
 print(f"\nVous êtes le manager du bar \"{nom_bar[0]}\".")
 
 
-# afficher le nombre de ventes effectuées ce mois-ci par ses employés et le montant que cela représente
+# afficher les boissons qui ont rapporté le plus d’argent dans leur établissement ce mois-ci
 # filtre : nom du bar du manager connecté
-# calcul : on refait le même calcul en comptant le nombre de boisson vendu, 
-# et en faisant la somme du prix de chaque boisson vendue, arrondie au centime près
-curseur.execute(f"SELECT COUNT(V.idBoisson), ROUND(SUM(C.prix_EU), 2) \
+# regroupement: par nom de boisson
+# trie : la somme des ventes de chaque boisson, arrondie au centime près, du nombre le plus grand au plus petit
+# limite : on limite la recherche au dix premiers résultats
+print("\nVoici la liste des 10 boissons qui ont rapporté le plus d'argent au mois de Novembre.")
+curseur.execute(f"SELECT C.boisson, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
             ON E.matricule = V.matricule \
             INNER JOIN Carte AS C \
             ON C.idBoisson = V.idBoisson \
-            WHERE E.nom_bar = \"{nom_bar[0]}\"")
+            WHERE E.nom_bar = \"{nom_bar[0]}\" \
+            GROUP BY C.boisson \
+            ORDER BY ROUND(SUM(C.prix_EU), 2) DESC \
+            LIMIT 10")
 results = curseur.fetchall()
 for r in results :
-    print(f"\nVos employés ont vendu {r[0]} boissons pour un total de {r[1]} euros en Novembre.")
+    print(f"{r[0]} a permis un bénéfice de {r[1]} euros.")
 
 
-# afficher les bénéfices générés par chaque employé du bar.
+# afficher les employés ayant rapporté le plus d’argent.
 # filtre : nom du bar du manager connecté
-# regroupement : par matricule, et par conséquent par employé, des ventes effectués par chacun d'entre eux
-# calcul : pour chaque employé, on calcul la somme du prix des boissons vendues, arrondie au centime près
-print("\nVoici les bénéfices générés par chacun de vos employés en Novembre.")
+# regroupement: par employé, grâce à leur matricule
+# trie : la somme des ventes effectuées par chaque employé, arrondie au centime près, du nombre le plus grand au plus petit
+# limite : on limite la recherche au 5 premiers résultats
+print("\nVoici la liste des 5 employés qui ont rapporté le plus d'argent au mois de Novembre.")
 curseur.execute(f"SELECT E.nom, E.prenom, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
@@ -67,10 +73,9 @@ curseur.execute(f"SELECT E.nom, E.prenom, ROUND(SUM(C.prix_EU), 2) \
             INNER JOIN Carte AS C \
             ON C.idBoisson = V.idBoisson \
             WHERE E.nom_bar = \"{nom_bar[0]}\" \
-            GROUP BY V.matricule")
+            GROUP BY V.matricule \
+            ORDER BY ROUND(SUM(C.prix_EU), 2) DESC \
+            LIMIT 5")
 results = curseur.fetchall()
 for r in results :
-    print(f"{r[1]} {r[0]} a fait un bénéfice de {round(r[2], 2)} euros.")
-
-
-bdd.close()
+    print(f"{r[1]} {r[0]} a fait un bénéfice de {r[2]} euros.")
