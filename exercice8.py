@@ -41,6 +41,10 @@ print(f"\nVous êtes le manager du bar \"{nom_bar[0]}\".")
 
 
 # afficher les boissons les moins vendues dans l’établissement ce mois-ci
+# filtre : le nom du bar du manager connecté
+# regroupement : grâce au jointure entre Carte et Ventes, les ventes sont regroupés par le nom de boisson de la table Carte
+# trie : par le nombre de boisson vendu (selon leur nom), du nombre le plus petit au plus grand
+# limite : on limite la recherche à 10 résultats
 print("\nVoici la liste des 10 boissons qui se sont le moins bien vendues dans votre établissement au mois de Novembre.")
 curseur.execute(f"SELECT C.boisson, COUNT(V.idBoisson) \
             FROM Employes AS E \
@@ -58,6 +62,10 @@ for r in results :
 
 
 # afficher les employés ayant vendu le moins de boissons.
+# filtre : le nom du bar du manager connecté
+# regroupement : grâce au jointure entre Employes et Ventes, les ventes sont regroupés par employés
+# trie : par le nombre de boisson vendu (selon l'employé), du nombre le plus petit au plus grand
+# limite : on limite la recherche à 5 résultats
 print("\nVoici la liste des 5 employés qui ont vendu le moins de boissons au mois de Novembre.")
 curseur.execute(f"SELECT E.nom, E.prenom, COUNT(V.idBoisson) \
             FROM Employes AS E \
