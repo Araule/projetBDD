@@ -15,6 +15,7 @@ results = curseur.fetchall()
 for r in results:
     print(f"\nnombre total de bars : {r[0]}")
 
+
 # nombre total d'employés
 curseur.execute("SELECT COUNT(matricule) \
                 FROM Employes")
@@ -22,7 +23,10 @@ results = curseur.fetchall()
 for r in results:
     print(f"\nnombre total d'employés : {r[0]}")
 
-#les managers de bars
+
+# les managers de bars
+# filtre : les matricules des managers se trouvent à la fois dans la table Employes et Etablissements
+# et les matricules des employés se trouvent uniquement dans la table Employes
 curseur.execute("SELECT prenom, nom, E.nom_bar \
                 FROM Employes as E, Etablissements as T \
                 WHERE E.matricule = T.matricule_manager \
@@ -32,7 +36,8 @@ results = curseur.fetchall()
 for r in results:
     print(f"{r[1]} {r[0]} dirige le bar \"{r[2]}\".")
 
-#nombre d'employés pour chaque profession
+# nombre d'employés pour chaque profession
+# regroupement et calcul : on regroupe le comptage des employés (grâce à leur matricule) par profession
 curseur.execute("SELECT COUNT(matricule), profession \
                     FROM Employes GROUP BY profession")
 print("\nnombre d'employés pour chaque profession : ")
@@ -40,17 +45,15 @@ results = curseur.fetchall()
 for r in results:
     print(f"{r[0]} {r[1]}s")
 
-#revenu total du groupe
-#Revu par Camille, fonctionne.
-#problème rencontré avec COUNT(idBoisson) : sqlite3.OperationalError: ambiguous column name:idBoisson
-#explication : même attribut dans deux tables différentes (Ventes, Carte)
-#solution : mettre le nom de la table comme préfixe à l'attribut pour savoir quel attribut on souhaite
-curseur.execute("SELECT COUNT(Ventes.idBoisson), ROUND(SUM(Carte.prix_EU), 2) \
+# revenu total du groupe
+# calcul : grâce à la jointure entre les tables Ventes et Cartes, chaque vente (ligne du tableau) a le prix de la boisson indiqué
+# on fait la somme des prix des boissons, on arrondie le résultat à deux chiffres après la virgule (au centime près)
+curseur.execute("SELECT ROUND(SUM(Carte.prix_EU), 2) \
                 FROM Ventes, Carte \
                 WHERE Ventes.idBoisson = Carte.idBoisson")
 print("\nrevenu total du groupe : ")
 results = curseur.fetchall()
 for r in results:
-    print(f"{r[0]} boissons ont été vendues, pour un total de {r[1]} euros.")
+    print(f"Les revenus du groupe sont de {r[0]} euros.")
 
 bdd.close()

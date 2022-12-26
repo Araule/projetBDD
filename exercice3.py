@@ -8,10 +8,11 @@ import csv
 bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
 
-#boissons vendues par chaque employé
-#problème rencontré : sqlite3.OperationalError: ambiguous column name:idBoisson
-#explication : même attribut dans deux tables différentes (Ventes, Carte)
-#solution : mettre le nom de la table comme préfixe à l'attribut pour savoir indiquer l'attribut de la table qu'on souhaite
+# boissons vendues par chaque employé et le montant total associé à ces ventes
+# regroupement : on regroupe par employé grâce à leur matricule
+# calcul : on compte le nombre de boissons vendus en comptant le nombre de ventes effectués (chaque vente reçoit un id unique)
+# Grâce à la jointure entre les tables Ventes et Cartes, chaque vente (ligne du tableau) a le prix de la boisson indiqué
+# on fait la somme des prix des boissons, on arrondie le résultat à deux chiffres après la virgule (au centime près)
 curseur.execute("SELECT E.nom, E.prenom, COUNT(V.idBoisson), ROUND(SUM(C.prix_EU),2) \
                     FROM Ventes AS V, Carte AS C, Employes AS E \
                     WHERE C.idBoisson = V.idBoisson \
