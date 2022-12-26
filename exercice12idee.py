@@ -93,10 +93,9 @@ curseur.execute(f"SELECT C.boisson, ROUND(SUM(C.prix_EU), 2) \
                     ON C.idBoisson = V.idBoisson \
                     WHERE E.nom_bar = \"{nom_bar[0]}\" \
                     GROUP BY C.boisson \
-                    ORDER BY ROUND(SUM(C.prix_EU), 2)")
+                    ORDER BY ROUND(SUM(C.prix_EU), 2)") # première requête où l'on regarde les bénéfices de la boisson sur le mois de novembre
 results = curseur.fetchall()
 for r in results :
-    
     if r[1] < (total_bénéfice * 0.02) :
         curseur.execute(f"SELECT COUNT(V.idboisson) \
                             FROM Employes AS E \
@@ -105,18 +104,16 @@ for r in results :
                             INNER JOIN Carte AS C \
                             ON C.idBoisson = V.idBoisson \
                             WHERE E.nom_bar = \"{nom_bar[0]}\" \
-                            AND C.boisson = \"{r[0]}\"")
+                            AND C.boisson = \"{r[0]}\"") # deuxième requête où l'on regarde le nombre de ventes sur le mois
         results2 = curseur.fetchall()
         
         for r2 in results2 :
-            
-            if r2[0] < (total_vendue * 0.01) :
-                liste_boisson.append(f"{r[0]} : {r[1]} euros de bénéfice, vendue {r2[0]} fois")
+            if r2[0] < (total_vendue * 0.01) : # si la boisson répond aux deux conditions
+                liste_boisson.append(f"{r[0]} : {r[1]} euros de bénéfice, vendue {r2[0]} fois") # on la rajoute à la liste
                 i += 1
     
-    if i != input_chiffre :
-        continue
-    
+    if i != input_chiffre : # si on atteint le chiffre choisi par le manager, la boucle s'arrête
+        continue # sinon "break" n'est pas pris en compte et la boucle continue
     break
 
 print(f"\nVous pouvez supprimer de la carte ces {i} boissons. Chaque boisson représente moins de 2% des recettes totales du mois de Novembre et moins de 1% du nombre total de boissons vendues.")
