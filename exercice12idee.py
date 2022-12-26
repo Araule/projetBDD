@@ -97,7 +97,7 @@ for r in results :
                 liste_boisson.append(f"{r[0]} : {r[1]} euros de bénéfice, vendue {r2[0]} fois")
                 i += 1
 
-print(f"\nVous pouvez supprimer de la carte {i} boissons.")
+print(f"\nVous pouvez supprimer de la carte {i} boissons. Chaque boisson représente moins de 1% des recettes totales du mois de Novembre et moins de 1% du nombre total de boissons vendues.")
 for ligne in liste_boisson :
     print(ligne)
 
