@@ -8,12 +8,6 @@ import csv
 bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
 
-def affiche(requete):
-    curseur.execute(requete)
-    results = curseur.fetchall()
-    for r in results:
-        print(r)
-    return 
 
 # Récuperer la date à laquelle le moins de vente a été enregistré
 # regroupement : par date

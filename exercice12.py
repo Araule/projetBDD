@@ -49,7 +49,7 @@ moins_benefice = []
 
 # affiche les boissons les moins vendues dans l’établissement ce mois-ci
 # filtre : le nom du bar du manager connecté
-# regroupement : grâce au jointure entre Carte et Ventes, les ventes sont regroupés par le nom de boisson de la table Carte
+# regroupement : grâce au jointure entre Carte et Ventes, les ventes sont regroupées par le nom de boisson de la table Carte
 # trie : par le nombre de boisson vendu (selon leur nom), du nombre le plus petit au plus grand
 print(f"\nVoici la liste des \"{input_chiffre}\" boissons qui se sont le moins bien vendues au mois de Novembre.")
 curseur.execute(f"SELECT C.boisson, COUNT(V.idBoisson) \
@@ -70,7 +70,7 @@ for r in boissons_peu_vendues :
 
 # afficher les boissons les moins vendues dans l’établissement ce mois-ci
 # filtre : le nom du bar du manager connecté
-# regroupement : grâce au jointure entre Carte et Ventes, les ventes sont regroupés par le nom de boisson de la table Carte
+# regroupement : grâce au jointure entre Carte et Ventes, les ventes sont regroupées par le nom de boisson de la table Carte
 # trie : par les bénéfices des ventes des boissons (selon leur nom), du nombre le plus petit au plus grand
 print(f"\nVoici la liste des \"{input_chiffre}\" boissons qui ont rapporté le moins d'argent au mois de Novembre.")
 curseur.execute(f"SELECT C.boisson, ROUND(SUM(C.prix_EU), 2) \
@@ -95,13 +95,13 @@ print(f"solution 2 : supprimer les {input_chiffre} boissons qui ont rapporté le
 input_solution = input("\nQuel solution préférez-vous utiliser ? (tapez 1 ou 2) : ")
 
 
-if input_solution == "1" :
+if input_solution == "1" : # alors on supprime les boissons qui se sont le moins bien vendues
     print("\nLes boissons supprimées seront : ")
     for boisson in moins_vendue : 
         print (boisson)
         curseur.execute(f"DELETE FROM Carte \
                             WHERE boisson = \"{boisson}\"")
-else :
+else : # sinon on supprimer les boissons qui ont rapporté le moins d'argent
     print("\nLes boissons supprimées seront : ")
     for boisson in moins_benefice : 
         print (boisson)
