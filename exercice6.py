@@ -9,7 +9,7 @@ from datetime import datetime
 bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
 
-# pour l'exercice, on affiche les identifiants de connexion des managers
+# on affiche les identifiants de connexion des managers
 curseur.execute("SELECT * FROM Managers")
 results = curseur.fetchall()
 for r in results :
@@ -18,8 +18,7 @@ for r in results :
 
 # Le manager se connecte
 identifiant = input("\nEntrez votre identifiant : ")
-mot_de_passe = input("Entrez votre matricule : ")
-
+mot_de_passe = input("Entrez votre mmot de passe : ")
 connexion = f"SELECT identifiant \
                 FROM Managers \
                 WHERE identifiant = '{identifiant}' \
@@ -40,8 +39,10 @@ nom_bar = curseur.fetchone()
 print(f"\nVous êtes le manager du bar \"{nom_bar[0]}\".")
 
 
-
 # afficher le nombre de ventes effectuées ce mois-ci par ses employés et le montant que cela représente
+# filtre : nom du bar du manager connecté
+# calcul : on refait le même calcul en comptant le nombre de boisson vendu, 
+# et en faisant la somme du prix de chaque boisson vendue, arrondie au centime près
 curseur.execute(f"SELECT COUNT(V.idBoisson), ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
@@ -55,6 +56,9 @@ for r in results :
 
 
 # afficher les bénéfices générés par chaque employé du bar.
+# filtre : nom du bar du manager connecté
+# regroupement : par matricule, et par conséquent par employé, des ventes effectués par chacun d'entre eux
+# calcul : pour chaque employé, on calcul la somme du prix des boissons vendues, arrondie au centime près
 print("\nVoici les bénéfices générés par chacun de vos employés en Novembre.")
 curseur.execute(f"SELECT E.nom, E.prenom, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \

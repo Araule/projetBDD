@@ -9,7 +9,7 @@ bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
 
 
-# pour l'exercice, on affiche les identifiants de connexion des managers
+# on affiche les identifiants de connexion des managers
 curseur.execute("SELECT * FROM Managers")
 results = curseur.fetchall()
 for r in results :
@@ -19,7 +19,6 @@ for r in results :
 # Le manager se connecte
 identifiant = input("\nEntrez votre identifiant : ")
 mot_de_passe = input("Entrez votre matricule : ")
-
 connexion = f"SELECT identifiant \
                 FROM Managers \
                 WHERE identifiant = '{identifiant}' \
@@ -45,6 +44,8 @@ date_saisie = input("\nTaper la  date de votre choix (au format jj/11/2022) : ")
 
 
 # afficher le nombre de ventes effectuées par ses employés et le montant que cela représente à la date choisie
+# même requête de l'exercice 6 mais on rajoute
+# filtre 2 : date choisie par le manager
 curseur.execute(f"SELECT COUNT(V.idBoisson), ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
             INNER JOIN Ventes AS V \
@@ -63,6 +64,8 @@ for r in results : # sinon
 
 
 # afficher les bénéfices générés par chaque employé du bar à la date choisie.
+# même requête de l'exercice 6 mais on rajoute
+# filtre 2 : date choisie par le manager
 print(f"\nVoici les bénéfices générés par chacun de vos employés le {date_saisie}.")
 curseur.execute(f"SELECT E.nom, E.prenom, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
