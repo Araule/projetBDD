@@ -63,7 +63,7 @@ for r in results :
 # filtre : nom du bar du manager connecté
 # regroupement: par employé, grâce à leur matricule
 # trie : la somme des ventes effectuées par chaque employé, arrondie au centime près, du nombre le plus grand au plus petit
-# limite : on limite la recherche au 5 premiers résultats
+# limite : on limite la recherche aux 5 premiers résultats
 print("\nVoici la liste des 5 employés qui ont rapporté le plus d'argent au mois de Novembre.")
 curseur.execute(f"SELECT E.nom, E.prenom, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
