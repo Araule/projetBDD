@@ -4,7 +4,6 @@
 
 import sqlite3
 import csv
-from datetime import datetime
 
 bdd = sqlite3.connect("BARS.db")
 curseur = bdd.cursor()
@@ -48,7 +47,10 @@ print(f"Vous souhaitez enlever {input_chiffre} de la carte.")
 moins_vendue = []
 moins_benefice = []
 
-
+# affiche les boissons les moins vendues dans l’établissement ce mois-ci
+# filtre : le nom du bar du manager connecté
+# regroupement : grâce au jointure entre Carte et Ventes, les ventes sont regroupés par le nom de boisson de la table Carte
+# trie : par le nombre de boisson vendu (selon leur nom), du nombre le plus petit au plus grand
 print(f"\nVoici la liste des \"{input_chiffre}\" boissons qui se sont le moins bien vendues au mois de Novembre.")
 curseur.execute(f"SELECT C.boisson, COUNT(V.idBoisson) \
             FROM Employes AS E \
@@ -66,6 +68,10 @@ for r in boissons_peu_vendues :
     moins_vendue.append(r[0])
 
 
+# afficher les boissons les moins vendues dans l’établissement ce mois-ci
+# filtre : le nom du bar du manager connecté
+# regroupement : grâce au jointure entre Carte et Ventes, les ventes sont regroupés par le nom de boisson de la table Carte
+# trie : par les bénéfices des ventes des boissons (selon leur nom), du nombre le plus petit au plus grand
 print(f"\nVoici la liste des \"{input_chiffre}\" boissons qui ont rapporté le moins d'argent au mois de Novembre.")
 curseur.execute(f"SELECT C.boisson, ROUND(SUM(C.prix_EU), 2) \
             FROM Employes AS E \
